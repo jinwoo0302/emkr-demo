@@ -31,11 +31,7 @@ a:hover {
 
 /* ===== Page Header ===== */
 .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 2rem;
+    position: relative;
     padding: 3rem 4rem;
     background: linear-gradient(135deg, #ffffff 0%, #eef2f8 100%);
     border-bottom: 1px solid #d8dee9;
@@ -43,24 +39,39 @@ a:hover {
 }
 
 .conf-logo {
+    position: absolute;
+    left: 4rem;
+    top: 50%;
+    transform: translateY(-50%);
     height: 120px;
     width: auto;
-    flex: 0 0 auto;
 }
 
+/* 제목은 헤더 전체 폭 기준 정중앙. 좌우에 로고 폭 이상의 여백을 둬 겹침 방지 */
 .header-text {
-    flex: 1 1 420px;
-    min-width: 0;
     text-align: center;
+    padding: 0 16rem;
 }
 
 @media screen and (min-width: 64em) {
     .page-header { padding: 4rem 5rem; }
+    .conf-logo { left: 5rem; }
 }
-@media screen and (max-width: 48em) {
-    .page-header { padding: 2rem 1.5rem; gap: 1rem; }
-    .conf-logo { height: 80px; }
-    .header-text { flex-basis: 100%; }
+/* 좁은 화면: 로고를 제목 위 중앙으로 내리고 세로 배치 */
+@media screen and (max-width: 60em) {
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem 1.5rem;
+    }
+    .conf-logo {
+        position: static;
+        transform: none;
+        height: 80px;
+    }
+    .header-text { padding: 0; }
 }
 
 /* ===== Main Content ===== */
