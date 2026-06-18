@@ -1,0 +1,254 @@
+{
+  "add_ex1": {
+    "sample_rate": 44100,
+    "prompt": "add a electric guitar event between 1.6s and 8.5s.",
+    "onset1": 1.6,
+    "offset1": 8.5,
+    "onset2": 1.6,
+    "offset2": 8.5,
+    "input_duration": 10.0,
+    "output_duration": 10.0,
+    "task": "add",
+    "label": "electric guitar",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "A woman talking while children talk in the background",
+    "n_fg": 1,
+    "target_idx": 0
+  },
+  "add_ex2": {
+    "sample_rate": 44100,
+    "prompt": "add snare drum, start at 4.9s and end at 5.3s.",
+    "onset1": 4.9,
+    "offset1": 5.3,
+    "onset2": 4.9,
+    "offset2": 5.3,
+    "input_duration": 9.999977324263039,
+    "output_duration": 9.999977324263039,
+    "task": "add",
+    "label": "snare drum",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "A kid speaking as camera plastic clicking followed by a crowd of people gasping and talking followed by a person whistling",
+    "n_fg": 1,
+    "target_idx": 0
+  },
+  "remove_ex1": {
+    "sample_rate": 44100,
+    "prompt": "remove alarm from 6.7s to 9.6s.",
+    "onset1": 6.7,
+    "offset1": 9.6,
+    "onset2": 6.7,
+    "offset2": 9.6,
+    "input_duration": 9.613514739229025,
+    "output_duration": 9.613514739229025,
+    "task": "remove",
+    "label": "alarm",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "A baby whining and crying",
+    "n_fg": 2,
+    "target_idx": 1,
+    "positions": [
+      [
+        2.1,
+        5.1
+      ],
+      [
+        6.7,
+        9.6
+      ]
+    ]
+  },
+  "remove_ex2": {
+    "sample_rate": 44100,
+    "prompt": "remove trumpet appearing between 0.3s and 3.0s.",
+    "onset1": 0.3,
+    "offset1": 3.0,
+    "onset2": 0.3,
+    "offset2": 3.0,
+    "input_duration": 9.060612244897959,
+    "output_duration": 9.060612244897959,
+    "task": "remove",
+    "label": "trumpet",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "Bells chiming followed by a train whistle blowing as a crowd of people talk in the background",
+    "n_fg": 2,
+    "target_idx": 0,
+    "positions": [
+      [
+        0.3,
+        3.0
+      ],
+      [
+        6.3,
+        9.0
+      ]
+    ]
+  },
+  "replace_ex1": {
+    "sample_rate": 44100,
+    "prompt": "replace bass guitar with zipper (clothing) from 6.3s to 10.0s.",
+    "onset1": 6.3,
+    "offset1": 10.0,
+    "onset2": 6.3,
+    "offset2": 10.0,
+    "input_duration": 10.000068027210885,
+    "output_duration": 10.000068027210885,
+    "task": "replace",
+    "label": "bass guitar",
+    "label2": "zipper (clothing)",
+    "fg_source": "fsd50k",
+    "bg_caption": "Instrumental music playing followed by heavy fabric being rustled then a man whistling",
+    "n_fg": 2,
+    "target_idx": 1,
+    "positions": [
+      [
+        0.7,
+        4.4
+      ],
+      [
+        6.3,
+        10.0
+      ]
+    ]
+  },
+  "replace_ex2": {
+    "sample_rate": 44100,
+    "prompt": "replace vehicle horn and car horn and honking by piano between 4.7s and 6.1s.",
+    "onset1": 4.7,
+    "offset1": 6.1,
+    "onset2": 4.7,
+    "offset2": 6.1,
+    "input_duration": 10.000068027210885,
+    "output_duration": 10.000068027210885,
+    "task": "replace",
+    "label": "vehicle horn and car horn and honking",
+    "label2": "piano",
+    "fg_source": "fsd50k",
+    "bg_caption": "Instrumental music playing followed by heavy fabric being rustled then a man whistling",
+    "n_fg": 2,
+    "target_idx": 0,
+    "positions": [
+      [
+        4.7,
+        6.1
+      ],
+      [
+        8.6,
+        10.0
+      ]
+    ]
+  },
+  "move_ex1": {
+    "sample_rate": 44100,
+    "prompt": "move screaming from 7.3s-9.2s to 0.4s-2.3s.",
+    "onset1": 7.3,
+    "offset1": 9.2,
+    "onset2": 0.4,
+    "offset2": 2.3,
+    "input_duration": 9.155034013605443,
+    "output_duration": 9.155034013605443,
+    "task": "move",
+    "label": "screaming",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "A woman talking as goats are baaing followed by footsteps on gravel then a man talking while an airplane flies in the distance",
+    "n_fg": 2,
+    "target_idx": 1,
+    "positions": [
+      [
+        2.6,
+        4.5
+      ],
+      [
+        7.3,
+        9.2
+      ]
+    ]
+  },
+  "move_ex2": {
+    "sample_rate": 44100,
+    "prompt": "move alarm from 7.2s-10.0s to 0.3s-3.1s.",
+    "onset1": 7.2,
+    "offset1": 10.0,
+    "onset2": 0.3,
+    "offset2": 3.1,
+    "input_duration": 10.0,
+    "output_duration": 10.0,
+    "task": "move",
+    "label": "alarm",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "Whistling and then a female singing",
+    "n_fg": 2,
+    "target_idx": 1,
+    "positions": [
+      [
+        3.2,
+        6.0
+      ],
+      [
+        7.2,
+        10.0
+      ]
+    ]
+  },
+  "extend_ex1": {
+    "sample_rate": 44100,
+    "prompt": "extend trumpet in 2.2s-4.1s to 1.1s-4.9s.",
+    "onset1": 2.2,
+    "offset1": 4.1,
+    "onset2": 1.1,
+    "offset2": 4.9,
+    "input_duration": 9.433514739229025,
+    "output_duration": 9.433514739229025,
+    "task": "extend",
+    "label": "trumpet",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "Some groaning followed by a woman speaking",
+    "n_fg": 2,
+    "target_idx": 0,
+    "positions": [
+      [
+        1.1,
+        4.9
+      ],
+      [
+        5.7,
+        9.4
+      ]
+    ],
+    "extend_k": 0
+  },
+  "extend_ex2": {
+    "sample_rate": 44100,
+    "prompt": "extend piano in 7.0s-8.8s to 6.5s-10.0s.",
+    "onset1": 7.0,
+    "offset1": 8.8,
+    "onset2": 6.5,
+    "offset2": 10.0,
+    "input_duration": 10.0,
+    "output_duration": 10.0,
+    "task": "extend",
+    "label": "piano",
+    "label2": "",
+    "fg_source": "fsd50k",
+    "bg_caption": "A large motor vehicle engine is idling, an adult female speaks, vehicle traffic is present, and people talk in the background",
+    "n_fg": 2,
+    "target_idx": 1,
+    "positions": [
+      [
+        0.8,
+        4.3
+      ],
+      [
+        6.5,
+        10.0
+      ]
+    ],
+    "extend_k": 0
+  }
+}

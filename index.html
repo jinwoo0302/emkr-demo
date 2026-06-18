@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>EMKR: Edit the Moment, Keep the Rest</title>
+  <meta property="og:title" content="EMKR: Edit the Moment, Keep the Rest">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f3460">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<section class="page-header">
+  <img src="./images/Interspeech2026_logo.png" class="conf-logo" alt="Interspeech 2026 logo">
+  <h1 style="color:white; font-size:2.2rem; margin-bottom:0.3rem;">
+    EMKR: Edit the Moment, Keep the Rest
+  </h1>
+  <p style="color:rgba(255,255,255,0.85); font-size:1.1rem; margin-top:0;">
+    Instruction-guided, time-localized audio editing with 100&nbsp;ms precision
+  </p>
+</section>
+
+<section class="main-context">
+
+  <!-- ===== Abstract ===== -->
+  <center><h2 id="abstract">Abstract</h2></center>
+  <p style="font-size:18px; padding-left:15px; padding-right:15px; text-align:justify;">
+    Audio editing aims to modify sound content while maintaining its acoustic context.
+    However, few studies have addressed temporal audio editing with precise control of event timing.
+    We propose <b>edit the moment, keep the rest (EMKR)</b>, an instruction-driven framework built on
+    Stable Audio Open that supports <em>adding</em>, <em>removing</em>, <em>replacing</em>,
+    <em>moving</em>, and <em>extending</em>.
+    EMKR is trained with a temporal editing pipeline that constructs triplets
+    (instruction, input audio, target audio), where the instruction carries information about when to edit.
+    It further incorporates an explicit edit interval for precise timing and a source-event mask
+    that preserves the original event instance in moving and extending.
+    Experiments on mixtures from real-world datasets show that EMKR enables time-localized editing
+    of polyphonic audio with 100&nbsp;ms precision while preserving non-edited regions.
+    This temporal control enables timing-critical editing tasks such as moving and extending.
+  </p>
+
+  <!-- ===== TOC ===== -->
+  <center><h2><p class="toc_title">Contents</p></h2></center>
+  <div id="toc_container">
+    <ol>
+      <li><a href="#1">Model Architecture &amp; Key Ideas</a></li>
+      <li><a href="#2">Audio Editing Demos</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 1. Model Architecture & Key Ideas                            -->
+  <!-- ============================================================ -->
+  <center><a name="1"><h2>1. Model Architecture &amp; Key Ideas</h2></a></center>
+
+  <div style="margin-top:20px;">
+    <h3 style="padding-left:10px;">1.1. Overview</h3>
+    <div style="text-align:center; margin-top:15px;">
+      <!-- TODO: Replace with your main figure -->
+      <img src="./images/figure.png"
+           alt="EMKR overview figure"
+           style="max-width:85%; height:auto; border-radius:8px;">
+    </div>
+    <center>
+      <figcaption>
+        Figure 1. Overall architecture of the proposed EMKR framework.
+      </figcaption>
+    </center>
+  </div>
+
+  <div>
+    <h3 style="padding-left:10px;">1.2. Key Ideas</h3>
+    <ul class="key-ideas" style="font-size:18px;">
+      <li>
+        <b>Temporal Triplets:</b> Training data is constructed as (instruction, input audio, target audio)
+        triplets on the fly, where each instruction specifies what to edit and when.
+      </li>
+      <li>
+        <b>Interval-based Timing Conditioning:</b> A reference interval
+        <b>R&nbsp;=&nbsp;[r<sub>s</sub>,&nbsp;r<sub>e</sub>]</b> identifies the target event instance,
+        and an edit interval <b>E&nbsp;=&nbsp;[e<sub>s</sub>,&nbsp;e<sub>e</sub>]</b> specifies
+        where the change is applied. Four timing embeddings are injected into the DiT via
+        global addition and cross-attention.
+      </li>
+      <li>
+        <b>Source-Event Masking:</b> For <em>moving</em> and <em>extending</em>, a binary mask
+        highlights the reference interval in the latent space, preserving the source event's
+        acoustic identity while the model relocates or extends it.
+      </li>
+      <li>
+        <b>Five Editing Operations:</b> <em>Adding</em>, <em>Removing</em>, <em>Replacing</em>, <em>Moving</em>, and <em>Extending</em> &mdash;
+        all with instance-level, time-localized control in polyphonic mixtures.
+      </li>
+    </ul>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 2. Audio Editing Demos                                       -->
+  <!-- ============================================================ -->
+  <center><a name="2"><h2>2. Audio Editing Demos</h2></a></center>
+
+  <p style="padding-left:10px; padding-right:10px;">
+    Below we present editing examples for each of the five tasks.
+    For each example, we show the input audio with its mel-spectrogram,
+    the editing instruction with reference/edit intervals, and outputs from
+    the <b>Ground Truth</b>, <b>EMKR (ours)</b>, <b>SAO-Instruct</b>, and <b>AUDIT</b>.
+  </p>
+
+  <!-- Task Tabs -->
+  <div class="task-tabs">
+    <button class="task-tab active" data-task="add"><em>Adding</em></button>
+    <button class="task-tab" data-task="remove"><em>Removing</em></button>
+    <button class="task-tab" data-task="replace"><em>Replacing</em></button>
+    <button class="task-tab" data-task="move"><em>Moving</em></button>
+    <button class="task-tab" data-task="extend"><em>Extending</em></button>
+  </div>
+
+
+  <!-- ==================== ADD ==================== -->
+  <div class="task-section active" id="task-add">
+    <h3 style="padding-left:10px;">Task: <em>Adding</em></h3>
+    <p style="padding-left:10px; color:#555;">
+      Insert a new sound event into a specified time interval of the mixture.
+    </p>
+
+    <!-- Example 1 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 1</h4>
+
+      <!-- Input -->
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/add_ex1_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata">
+            <source src="./audio/add_ex1_input.wav" type="audio/wav">
+          </audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Add a electric guitar event between 1.6s and 8.5s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [1.6 s, 8.5 s]</span>
+            <span class="interval-tag interval-edit">E = [1.6 s, 8.5 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison -->
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/add_ex1_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex1_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/add_ex1_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex1_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/add_ex1_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex1_sao.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">AUDIT</div>
+          <img src="./spectrograms/add_ex1_audit.png" alt="AUDIT spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex1_audit.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 2</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/add_ex2_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata">
+            <source src="./audio/add_ex2_input.wav" type="audio/wav">
+          </audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Add snare drum, start at 4.9s and end at 5.3s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [4.9 s, 5.3 s]</span>
+            <span class="interval-tag interval-edit">E = [4.9 s, 5.3 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/add_ex2_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex2_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/add_ex2_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex2_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/add_ex2_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex2_sao.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">AUDIT</div>
+          <img src="./spectrograms/add_ex2_audit.png" alt="AUDIT spectrogram">
+          <audio controls preload="metadata"><source src="./audio/add_ex2_audit.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+  </div><!-- end task-add -->
+
+
+  <!-- ==================== REMOVE ==================== -->
+  <div class="task-section" id="task-remove">
+    <h3 style="padding-left:10px;">Task: <em>Removing</em></h3>
+    <p style="padding-left:10px; color:#555;">
+      Remove a specific event instance from the mixture at the given time interval.
+    </p>
+
+    <!-- Example 1 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 1</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/remove_ex1_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata">
+            <source src="./audio/remove_ex1_input.wav" type="audio/wav">
+          </audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Remove alarm from 6.7s to 9.6s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [6.7 s, 9.6 s]</span>
+            <span class="interval-tag interval-edit">E = [6.7 s, 9.6 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/remove_ex1_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex1_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/remove_ex1_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex1_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/remove_ex1_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex1_sao.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">AUDIT</div>
+          <img src="./spectrograms/remove_ex1_audit.png" alt="AUDIT spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex1_audit.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 2</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/remove_ex2_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex2_input.wav" type="audio/wav"></audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Remove trumpet appearing between 0.3s and 3.0s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [0.3 s, 3.0 s]</span>
+            <span class="interval-tag interval-edit">E = [0.3 s, 3.0 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/remove_ex2_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex2_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/remove_ex2_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex2_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/remove_ex2_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex2_sao.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">AUDIT</div>
+          <img src="./spectrograms/remove_ex2_audit.png" alt="AUDIT spectrogram">
+          <audio controls preload="metadata"><source src="./audio/remove_ex2_audit.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+  </div><!-- end task-remove -->
+
+
+  <!-- ==================== REPLACE ==================== -->
+  <div class="task-section" id="task-replace">
+    <h3 style="padding-left:10px;">Task: <em>Replacing</em></h3>
+    <p style="padding-left:10px; color:#555;">
+      Replace a specific event instance with a different sound class at the same time interval.
+    </p>
+
+    <!-- Example 1 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 1</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/replace_ex1_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex1_input.wav" type="audio/wav"></audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Replace bass guitar with zipper (clothing) from 6.3s to 10.0s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [6.3 s, 10.0 s]</span>
+            <span class="interval-tag interval-edit">E = [6.3 s, 10.0 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/replace_ex1_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex1_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/replace_ex1_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex1_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/replace_ex1_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex1_sao.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">AUDIT</div>
+          <img src="./spectrograms/replace_ex1_audit.png" alt="AUDIT spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex1_audit.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 2</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/replace_ex2_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex2_input.wav" type="audio/wav"></audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Replace vehicle horn, car horn & honking by piano between 4.7s and 6.1s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [4.7 s, 6.1 s]</span>
+            <span class="interval-tag interval-edit">E = [4.7 s, 6.1 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/replace_ex2_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex2_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/replace_ex2_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex2_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/replace_ex2_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex2_sao.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">AUDIT</div>
+          <img src="./spectrograms/replace_ex2_audit.png" alt="AUDIT spectrogram">
+          <audio controls preload="metadata"><source src="./audio/replace_ex2_audit.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+  </div><!-- end task-replace -->
+
+
+  <!-- ==================== MOVE ==================== -->
+  <div class="task-section" id="task-move">
+    <h3 style="padding-left:10px;">Task: <em>Moving</em></h3>
+    <p style="padding-left:10px; color:#555;">
+      Relocate a specific event instance from the reference interval to a different edit interval,
+      preserving its acoustic identity and the surrounding background.
+    </p>
+
+    <!-- Example 1 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 1</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/move_ex1_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex1_input.wav" type="audio/wav"></audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Move screaming from 7.3s&ndash;9.2s to 0.4s&ndash;2.3s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [7.3 s, 9.2 s]</span>
+            <span class="interval-tag interval-edit">E = [0.4 s, 2.3 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/move_ex1_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex1_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/move_ex1_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex1_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/move_ex1_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex1_sao.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 2</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/move_ex2_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex2_input.wav" type="audio/wav"></audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Move alarm from 7.2s&ndash;10.0s to 0.3s&ndash;3.1s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [7.2 s, 10.0 s]</span>
+            <span class="interval-tag interval-edit">E = [0.3 s, 3.1 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/move_ex2_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex2_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/move_ex2_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex2_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/move_ex2_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/move_ex2_sao.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+  </div><!-- end task-move -->
+
+
+  <!-- ==================== EXTEND ==================== -->
+  <div class="task-section" id="task-extend">
+    <h3 style="padding-left:10px;">Task: <em>Extending</em></h3>
+    <p style="padding-left:10px; color:#555;">
+      Extend an existing event instance to cover a longer time interval
+      while preserving the original segment and background.
+    </p>
+
+    <!-- Example 1 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 1</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/extend_ex1_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex1_input.wav" type="audio/wav"></audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Extend trumpet in 2.2s&ndash;4.1s to 1.1s&ndash;4.9s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [2.2 s, 4.1 s]</span>
+            <span class="interval-tag interval-edit">E = [1.1 s, 4.9 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/extend_ex1_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex1_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/extend_ex1_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex1_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/extend_ex1_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex1_sao.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="example-block">
+      <h4 style="padding-left:10px;">Example 2</h4>
+
+      <div class="input-row">
+        <div class="input-spec">
+          <h4 style="margin-top:0;">Input Audio</h4>
+          <img src="./spectrograms/extend_ex2_input.png" alt="Input mel-spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex2_input.wav" type="audio/wav"></audio>
+
+        </div>
+        <div class="input-info">
+          <h4 style="margin-top:0;">Instruction</h4>
+          <p>"Extend piano in 7.0s&ndash;8.8s to 6.5s&ndash;10.0s."</p>
+          <div>
+            <span class="interval-tag interval-ref">R = [7.0 s, 8.8 s]</span>
+            <span class="interval-tag interval-edit">E = [6.5 s, 10.0 s]</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="padding-left:10px;">Output Comparison</h4>
+      <div class="comparison-grid">
+        <div class="method-card">
+          <div class="method-name">Ground Truth</div>
+          <img src="./spectrograms/extend_ex2_gt.png" alt="Ground Truth spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex2_gt.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card ours">
+          <div class="method-name">EMKR (Ours)</div>
+          <img src="./spectrograms/extend_ex2_emkr.png" alt="EMKR spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex2_emkr.wav" type="audio/wav"></audio>
+        </div>
+        <div class="method-card">
+          <div class="method-name">SAO-Instruct</div>
+          <img src="./spectrograms/extend_ex2_sao.png" alt="SAO-Instruct spectrogram">
+          <audio controls preload="metadata"><source src="./audio/extend_ex2_sao.wav" type="audio/wav"></audio>
+        </div>
+      </div>
+    </div>
+  </div><!-- end task-extend -->
+
+
+
+</section>
+
+<br><br>
+<hr>
+
+<!-- ===== Tab switching script ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var tabs = document.querySelectorAll('.task-tab');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var task = this.getAttribute('data-task');
+      // Hide all task sections
+      document.querySelectorAll('.task-section').forEach(function(el) {
+        el.classList.remove('active');
+      });
+      // Deactivate all tabs
+      tabs.forEach(function(t) {
+        t.classList.remove('active');
+      });
+      // Show selected task & activate tab
+      document.getElementById('task-' + task).classList.add('active');
+      this.classList.add('active');
+    });
+  });
+});
+</script>
+
+</body>
+</html>
