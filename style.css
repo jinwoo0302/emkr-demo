@@ -30,48 +30,46 @@ a:hover {
 }
 
 /* ===== Page Header ===== */
+/* Grid 3컬럼 대칭: [로고 | 제목 | 로고와 같은 폭의 spacer] → 제목 정중앙 + 절대 안 겹침 */
 .page-header {
-    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: 2rem;
     padding: 3rem 4rem;
     background: linear-gradient(135deg, #ffffff 0%, #eef2f8 100%);
     border-bottom: 1px solid #d8dee9;
     color: #0f3460;
 }
 
+/* 왼쪽 1fr 칸 안에서 로고를 왼쪽 정렬 */
 .conf-logo {
-    position: absolute;
-    left: 4rem;
-    top: 50%;
-    transform: translateY(-50%);
+    grid-column: 1;
+    justify-self: start;
     height: 120px;
     width: auto;
 }
 
-/* 제목은 헤더 전체 폭 기준 정중앙. 좌우에 로고 폭 이상의 여백을 둬 겹침 방지 */
+/* 가운데 auto 칸: 제목. 양옆 1fr이 대칭이라 헤더 정중앙에 위치 */
 .header-text {
+    grid-column: 2;
     text-align: center;
-    padding: 0 16rem;
+    min-width: 0;
 }
 
 @media screen and (min-width: 64em) {
     .page-header { padding: 4rem 5rem; }
-    .conf-logo { left: 5rem; }
 }
-/* 좁은 화면: 로고를 제목 위 중앙으로 내리고 세로 배치 */
+/* 좁은 화면: 1컬럼 세로 배치 (로고 위, 제목 아래, 둘 다 중앙) */
 @media screen and (max-width: 60em) {
     .page-header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
+        grid-template-columns: 1fr;
+        justify-items: center;
+        row-gap: 1rem;
         padding: 2rem 1.5rem;
     }
-    .conf-logo {
-        position: static;
-        transform: none;
-        height: 80px;
-    }
-    .header-text { padding: 0; }
+    .conf-logo { grid-column: 1; justify-self: center; height: 80px; }
+    .header-text { grid-column: 1; }
 }
 
 /* ===== Main Content ===== */
