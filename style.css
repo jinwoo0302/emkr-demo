@@ -31,38 +31,36 @@ a:hover {
 
 /* ===== Page Header ===== */
 .page-header {
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 3rem 4rem;
     background: linear-gradient(135deg, #ffffff 0%, #eef2f8 100%);
     border-bottom: 1px solid #d8dee9;
     color: #0f3460;
-    text-align: center;
 }
 
 .conf-logo {
-    position: absolute;
-    left: 30px;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 140px;
+    height: 120px;
     width: auto;
+    flex: 0 0 auto;
+}
+
+.header-text {
+    flex: 1 1 420px;
+    min-width: 0;
+    text-align: center;
 }
 
 @media screen and (min-width: 64em) {
-    .page-header { padding: 4rem 6rem }
+    .page-header { padding: 4rem 5rem; }
 }
-@media screen and (min-width: 42em) and (max-width: 64em) {
-    .page-header { padding: 3rem 4rem }
-    .conf-logo { height: 90px; left: 16px; }
-}
-@media screen and (max-width: 42em) {
-    .page-header { padding: 2rem 1rem }
-    .conf-logo {
-        position: static;
-        transform: none;
-        height: 60px;
-        display: block;
-        margin: 0 auto 1rem;
-    }
+@media screen and (max-width: 48em) {
+    .page-header { padding: 2rem 1.5rem; gap: 1rem; }
+    .conf-logo { height: 80px; }
+    .header-text { flex-basis: 100%; }
 }
 
 /* ===== Main Content ===== */
